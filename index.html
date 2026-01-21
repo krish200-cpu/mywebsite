@@ -1,241 +1,178 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transparency | Funeral Comparison Prototype</title>
-    <style>
-        :root {
-            --primary: #1a2a3a;
-            --gold: #936a04;
-            --green: #27ae60;
-            --bg: #f4f7f6;
-            --text: #333;
-            --white: #ffffff;
-        }
+'use client';
 
-        body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; line-height: 1.5; }
+import { useState } from 'react';
+import styles from './page.module.css';
 
-        /* HEADER */
-        header { background: var(--white); padding: 1rem 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
-        .logo { font-size: 1.5rem; font-weight: 800; color: var(--primary); letter-spacing: -1px; }
-        .fd-login { color: var(--gold); text-decoration: none; font-weight: 600; font-size: 0.9rem; border: 1px solid var(--gold); padding: 8px 15px; border-radius: 5px; }
+// 1. Define the Data
+const PROVIDERS = [
+  {
+    id: 1,
+    name: "Rosewood Independent Care",
+    location: "0.8 miles away • Corringham",
+    price: 1850,
+    score: 98,
+    tags: ["Private Chapel", "24/7 Collection", "Eco-Options"],
+    reviews: "⭐⭐⭐⭐⭐ (124 reviews)",
+    owner: "Family Owned",
+    chapel: "Yes",
+    collection: "24/7 Included",
+    isSponsored: true
+  },
+  {
+    id: 2,
+    name: "City Memorial Services",
+    location: "2.4 miles away • Stanford-le-Hope",
+    price: 2200,
+    score: 62,
+    tags: ["Corporate Group", "Modern Facilities"],
+    reviews: "⭐⭐⭐⭐ (32 reviews)",
+    owner: "Corporate Group",
+    chapel: "Yes",
+    collection: "Additional Fee",
+    isSponsored: false
+  }
+];
 
-        /* LAYOUT */
-        .container { display: flex; max-width: 1200px; margin: 2rem auto; gap: 2rem; padding: 0 20px; }
-        
-        /* FILTERS */
-        .filters { width: 250px; flex-shrink: 0; }
-        .filter-box { background: var(--white); padding: 20px; border-radius: 12px; position: sticky; top: 100px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
-        .filter-group { margin-bottom: 20px; }
-        .filter-group h4 { margin-bottom: 10px; font-size: 0.8rem; text-transform: uppercase; color: #888; letter-spacing: 1px; }
-        label { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 0.9rem; cursor: pointer; color: #555; }
+export default function FuneralComparisonPage() {
+  // 2. State Management
+  const [compareList, setCompareList] = useState<number[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-        /* SEARCH RESULTS */
-        .results { flex-grow: 1; }
-        .card { 
-            background: var(--white); border-radius: 12px; padding: 25px; margin-bottom: 1.5rem; 
-            display: grid; grid-template-columns: 1fr 220px; gap: 20px;
-            border: 1px solid #e0e0e0; transition: all 0.2s ease; 
-        }
-        .card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
-        .sponsored { border: 2px solid var(--gold); background: #fffdf5; }
-        
-        .score-pill { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; margin-bottom: 10px; }
-        .high-score { background: #e8f5e9; color: #2e7d32; }
-        .med-score { background: #fff3e0; color: #ef6c00; }
-        
-        .price-tag { font-size: 2rem; font-weight: 800; color: var(--primary); margin: 5px 0; }
-        .btn-book { background: var(--green); color: white; border: none; width: 100%; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-bottom: 8px; transition: opacity 0.2s; }
-        .btn-book:hover { opacity: 0.9; }
-        .btn-compare { background: white; border: 1px solid #ddd; width: 100%; padding: 8px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; transition: all 0.2s; }
-        .btn-compare.active { background: var(--primary); color: white; border-color: var(--primary); }
+  // 3. Handlers
+  const toggleCompare = (id: number) => {
+    if (compareList.includes(id)) {
+      setCompareList(prev => prev.filter(pId => pId !== id));
+    } else {
+      if (compareList.length >= 3) {
+        alert("You can only select up to 3 providers.");
+        return;
+      }
+      setCompareList(prev => [...prev, id]);
+    }
+  };
 
-        .tag { background: #f0f1f3; padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; margin-right: 5px; color: #555; font-weight: 500; }
+  const clearCompare = () => {
+    setCompareList([]);
+  };
 
-        /* COMPARISON BAR */
-        #compare-bar { 
-            position: fixed; bottom: 0; left: 0; right: 0; background: var(--primary); 
-            color: white; padding: 1.2rem 5%; display: none; justify-content: space-between; 
-            align-items: center; z-index: 1000; animation: slideUp 0.3s ease; box-shadow: 0 -5px 20px rgba(0,0,0,0.2);
-        }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  const selectedProviders = PROVIDERS.filter(p => compareList.includes(p.id));
 
-        /* MODAL */
-        #compare-modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center;
-            padding: 20px;
-        }
-        .modal-content {
-            background: white; width: 100%; max-width: 1000px; border-radius: 15px; padding: 40px;
-            position: relative; overflow-x: auto;
-        }
-        .close-modal { position: absolute; top: 20px; right: 20px; font-size: 2rem; cursor: pointer; color: #888; }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; }
-        th { color: #888; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; }
+  return (
+    <div style={{ background: '#f4f7f6', minHeight: '100vh' }}>
+      {/* HEADER */}
+      <header className={styles.header}>
+        <div className={styles.logo}>TRANSPARENCY</div>
+        <nav>
+          <a href="#" className={styles.fdLogin}>Director Login</a>
+        </nav>
+      </header>
 
-        /* RESPONSIVE */
-        @media (max-width: 850px) {
-            .container { flex-direction: column; }
-            .filters { width: 100%; }
-            .card { grid-template-columns: 1fr; }
-            .card div:last-child { border-left: none; border-top: 1px solid #eee; padding-top: 20px; text-align: left; }
-        }
-    </style>
-</head>
-<body>
-
-<header>
-    <div class="logo">TRANSPARENCY</div>
-    <nav>
-        <a href="#" class="fd-login">Director Login</a>
-    </nav>
-</header>
-
-<div class="container">
-    <aside class="filters">
-        <div class="filter-box">
-            <div class="filter-group">
-                <h4>Service Type</h4>
-                <label><input type="checkbox" checked> Direct Cremation</label>
-                <label><input type="checkbox"> Traditional Burial</label>
-                <label><input type="checkbox"> Eco-Funeral</label>
+      <div className={styles.container}>
+        {/* FILTERS SIDEBAR */}
+        <aside className={styles.filters}>
+          <div className={styles.filterBox}>
+            <div className={styles.filterGroup}>
+              <h4>Service Type</h4>
+              <label className={styles.label}><input type="checkbox" defaultChecked /> Direct Cremation</label>
+              <label className={styles.label}><input type="checkbox" /> Traditional Burial</label>
+              <label className={styles.label}><input type="checkbox" /> Eco-Funeral</label>
             </div>
-            <div class="filter-group">
-                <h4>Ownership</h4>
-                <label><input type="checkbox"> Family Owned</label>
-                <label><input type="checkbox"> Large Corporate</label>
+            <div className={styles.filterGroup}>
+              <h4>Ownership</h4>
+              <label className={styles.label}><input type="checkbox" /> Family Owned</label>
+              <label className={styles.label}><input type="checkbox" /> Large Corporate</label>
             </div>
-        </div>
-    </aside>
+          </div>
+        </aside>
 
-    <main class="results" id="results-list">
-        <div class="card sponsored" data-id="1" data-name="Rosewood Independent Care" data-price="1850" data-score="98" data-owner="Family Owned">
-            <div>
-                <span class="score-pill high-score">98% Transparency Score</span>
-                <h2 style="margin:0">Rosewood Independent Care</h2>
-                <p style="color: #666; margin: 5px 0;">0.8 miles away • Corringham</p>
-                <div style="margin: 15px 0;">
-                    <span class="tag">Private Chapel</span>
-                    <span class="tag">24/7 Collection</span>
-                    <span class="tag">Eco-Options</span>
+        {/* RESULTS FEED */}
+        <main className={styles.results}>
+          {PROVIDERS.map((provider) => (
+            <div 
+              key={provider.id} 
+              className={`${styles.card} ${provider.isSponsored ? styles.sponsored : ''}`}
+            >
+              <div>
+                <span className={`${styles.scorePill} ${provider.score > 80 ? styles.highScore : styles.medScore}`}>
+                  {provider.score}% Transparency Score
+                </span>
+                <h2 style={{ margin: 0 }}>{provider.name}</h2>
+                <p style={{ color: '#666', margin: '5px 0' }}>{provider.location}</p>
+                <div style={{ margin: '15px 0' }}>
+                  {provider.tags.map(tag => (
+                    <span key={tag} className={styles.tag}>{tag}</span>
+                  ))}
                 </div>
-                <p style="font-size: 0.85rem;">⭐⭐⭐⭐⭐ (124 reviews)</p>
+                <p style={{ fontSize: '0.85rem' }}>{provider.reviews}</p>
+              </div>
+
+              <div style={{ textAlign: 'right', borderLeft: '1px solid #eee', paddingLeft: '20px' }}>
+                <div style={{ fontSize: '0.8rem', color: '#888' }}>Total Estimated Cost</div>
+                <div className={styles.priceTag}>£{provider.price.toLocaleString()}</div>
+                <button className={styles.btnBook}>Book Now</button>
+                <button 
+                  className={`${styles.btnCompare} ${compareList.includes(provider.id) ? styles.btnCompareActive : ''}`}
+                  onClick={() => toggleCompare(provider.id)}
+                >
+                  {compareList.includes(provider.id) ? "✓ Selected" : "+ Compare"}
+                </button>
+              </div>
             </div>
-            <div style="text-align: right; border-left: 1px solid #eee; padding-left: 20px;">
-                <div style="font-size: 0.8rem; color: #888;">Total Estimated Cost</div>
-                <div class="price-tag">£1,850</div>
-                <button class="btn-book">Book Now</button>
-                <button class="btn-compare" onclick="toggleCompare(1, this)">+ Compare</button>
-            </div>
+          ))}
+        </main>
+      </div>
+
+      {/* COMPARISON BAR (Fixed Bottom) */}
+      {compareList.length > 0 && (
+        <div className={styles.compareBar}>
+          <div>{compareList.length} provider(s) selected</div>
+          <div>
+            <button className={styles.clearBtn} onClick={clearCompare}>Clear All</button>
+            <button className={styles.compareActionBtn} onClick={() => setIsModalOpen(true)}>
+              Compare Details Now
+            </button>
+          </div>
         </div>
+      )}
 
-        <div class="card" data-id="2" data-name="City Memorial Services" data-price="2200" data-score="62" data-owner="Corporate">
-            <div>
-                <span class="score-pill med-score">62% Transparency Score</span>
-                <h2 style="margin:0">City Memorial Services</h2>
-                <p style="color: #666; margin: 5px 0;">2.4 miles away • Stanford-le-Hope</p>
-                <div style="margin: 15px 0;">
-                    <span class="tag">Corporate Group</span>
-                    <span class="tag">Modern Facilities</span>
-                </div>
-                <p style="font-size: 0.85rem;">⭐⭐⭐⭐ (32 reviews)</p>
-            </div>
-            <div style="text-align: right; border-left: 1px solid #eee; padding-left: 20px;">
-                <div style="font-size: 0.8rem; color: #888;">Total Estimated Cost</div>
-                <div class="price-tag">£2,200</div>
-                <button class="btn-book">Book Now</button>
-                <button class="btn-compare" onclick="toggleCompare(2, this)">+ Compare</button>
-            </div>
+      {/* COMPARISON MODAL */}
+      {isModalOpen && (
+        <div className={styles.modalOverlay} onClick={() => setIsModalOpen(false)}>
+          <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
+            <span className={styles.closeModal} onClick={() => setIsModalOpen(false)}>&times;</span>
+            <h2 style={{ marginTop: 0 }}>Provider Comparison</h2>
+            
+            <table className={styles.table}>
+              <tbody>
+                <tr>
+                  <th>Feature</th>
+                  {selectedProviders.map(p => <th key={p.id}>{p.name}</th>)}
+                </tr>
+                <tr>
+                  <td>Est. Total Price</td>
+                  {selectedProviders.map(p => <td key={p.id}><strong>£{p.price.toLocaleString()}</strong></td>)}
+                </tr>
+                <tr>
+                  <td>Transparency Score</td>
+                  {selectedProviders.map(p => <td key={p.id}>{p.score}%</td>)}
+                </tr>
+                <tr>
+                  <td>Ownership</td>
+                  {selectedProviders.map(p => <td key={p.id}>{p.owner}</td>)}
+                </tr>
+                <tr>
+                  <td>Private Chapel</td>
+                  {selectedProviders.map(p => <td key={p.id}>{p.chapel}</td>)}
+                </tr>
+                <tr>
+                  <td>Collection</td>
+                  {selectedProviders.map(p => <td key={p.id}>{p.collection}</td>)}
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-    </main>
-</div>
-
-<div id="compare-bar">
-    <div id="compare-text">0 providers selected</div>
-    <div>
-        <button onclick="clearCompare()" style="background:transparent; color:white; border:none; margin-right:15px; cursor:pointer; font-size:0.8rem;">Clear All</button>
-        <button onclick="openCompareModal()" style="background: var(--gold); border:none; padding:10px 25px; border-radius:5px; color:white; font-weight:bold; cursor:pointer;">Compare Details Now</button>
+      )}
     </div>
-</div>
-
-<div id="compare-modal">
-    <div class="modal-content">
-        <span class="close-modal" onclick="closeCompareModal()">&times;</span>
-        <h2 style="margin-top:0">Provider Comparison</h2>
-        <div id="modal-table-container">
-            </div>
-    </div>
-</div>
-
-<script>
-    let compareList = [];
-    const providers = [
-        { id: 1, name: "Rosewood Independent Care", price: "£1,850", score: "98%", owner: "Family Owned", chapel: "Yes", collection: "24/7 Included" },
-        { id: 2, name: "City Memorial Services", price: "£2,200", score: "62%", owner: "Corporate Group", chapel: "Yes", collection: "Additional Fee" }
-    ];
-
-    function toggleCompare(id, btn) {
-        const index = compareList.indexOf(id);
-        if (index === -1) {
-            if (compareList.length >= 3) return alert("Select up to 3 providers");
-            compareList.push(id);
-            btn.innerText = "✓ Selected";
-            btn.classList.add('active');
-        } else {
-            compareList.splice(index, 1);
-            btn.innerText = "+ Compare";
-            btn.classList.remove('active');
-        }
-        updateBar();
-    }
-
-    function updateBar() {
-        const bar = document.getElementById('compare-bar');
-        const text = document.getElementById('compare-text');
-        bar.style.display = compareList.length > 0 ? 'flex' : 'none';
-        text.innerText = `${compareList.length} provider(s) selected for side-by-side comparison`;
-    }
-
-    function clearCompare() {
-        compareList = [];
-        document.querySelectorAll('.btn-compare').forEach(btn => {
-            btn.innerText = "+ Compare";
-            btn.classList.remove('active');
-        });
-        updateBar();
-    }
-
-    function openCompareModal() {
-        const container = document.getElementById('modal-table-container');
-        const selectedData = providers.filter(p => compareList.includes(p.id));
-        
-        let html = `<table>
-            <tr><th>Feature</th>${selectedData.map(p => `<th>${p.name}</th>`).join('')}</tr>
-            <tr><td>Est. Total Price</td>${selectedData.map(p => `<td><strong>${p.price}</strong></td>`).join('')}</tr>
-            <tr><td>Transparency Score</td>${selectedData.map(p => `<td>${p.score}</td>`).join('')}</tr>
-            <tr><td>Ownership</td>${selectedData.map(p => `<td>${p.owner}</td>`).join('')}</tr>
-            <tr><td>Private Chapel</td>${selectedData.map(p => `<td>${p.chapel}</td>`).join('')}</tr>
-            <tr><td>Collection</td>${selectedData.map(p => `<td>${p.collection}</td>`).join('')}</tr>
-        </table>`;
-        
-        container.innerHTML = html;
-        document.getElementById('compare-modal').style.display = 'flex';
-    }
-
-    function closeCompareModal() {
-        document.getElementById('compare-modal').style.display = 'none';
-    }
-
-    // Close modal on outside click
-    window.onclick = function(event) {
-        const modal = document.getElementById('compare-modal');
-        if (event.target == modal) closeCompareModal();
-    }
-</script>
-
-</body>
-</html>
+  );
+}
