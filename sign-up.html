@@ -1,0 +1,42 @@
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+  import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+
+  const firebaseConfig = { /* YOUR SDK CONFIG HERE */ };
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const MASTER_KEY = "FUNERAL-2026"; // The key you give to partners
+
+  document.getElementById('signupForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const inviteKey = document.getElementById('inviteKey').value;
+
+    if (inviteKey !== MASTER_KEY) {
+      alert("Invalid Invitation Key. Access Denied.");
+      return;
+    }
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Create a record in Firestore marked as "NOT APPROVED"
+      await setDoc(doc(db, "users", user.uid), {
+        email: email,
+        isApproved: false, // You must change this to true manually in the console
+        role: "director",
+        createdAt: new Date()
+      });
+
+      alert("Account created. Please wait for admin approval before logging in.");
+      window.location.href = "index.html";
+    } catch (error) {
+      alert(error.message);
+    }
+  });
+</script>
