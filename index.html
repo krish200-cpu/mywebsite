@@ -2,65 +2,154 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Director Login | Funeral Match</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Funeral Match | Secure Entrance</title>
+    <style>
+        /* SOFT LUXURY AESTHETIC */
+        :root { --bg: #fdfdfd; --accent: #c5a059; --dark: #1a1a1a; --border: #e0e0e0; }
+        body { background: var(--bg); font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: var(--dark); }
+        
+        .login-card { 
+            background: white; 
+            padding: 3.5rem; 
+            width: 100%; 
+            max-width: 380px; 
+            border: 1px solid var(--border); 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.03); 
+            text-align: center; 
+        }
+
+        .logo { font-weight: 300; letter-spacing: 5px; margin-bottom: 2.5rem; text-transform: uppercase; font-size: 1.3rem; }
+        .logo span { font-weight: 700; color: var(--accent); }
+
+        .input-group { text-align: left; margin-bottom: 1.5rem; }
+        label { display: block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 0.5rem; color: #888; }
+        
+        input { 
+            width: 100%; padding: 12px 0; 
+            border: none; border-bottom: 1px solid var(--border); 
+            outline: none; font-size: 1rem; 
+            background: transparent; transition: 0.3s; 
+        }
+        input:focus { border-bottom: 1px solid var(--accent); }
+
+        .btn { 
+            width: 100%; padding: 18px; 
+            background: var(--dark); color: white; 
+            border: none; text-transform: uppercase; 
+            letter-spacing: 2px; cursor: pointer; 
+            font-size: 0.8rem; margin-top: 1rem; transition: 0.3s; 
+        }
+        .btn:hover { background: var(--accent); }
+
+        .footer-link { margin-top: 2rem; font-size: 0.75rem; color: #888; }
+        .footer-link a { color: var(--accent); text-decoration: none; font-weight: bold; }
+
+        /* DEBUG CONSOLE (Hidden unless error occurs) */
+        #error-box { display: none; background: #ffeded; color: #d00; padding: 10px; font-size: 0.8rem; margin-top: 1rem; border: 1px solid #ffcccc; text-align: left; }
+    </style>
 </head>
 <body>
-    <div class="container">
+
+    <div class="login-card">
         <div class="logo">FUNERAL<span>MATCH</span></div>
         
         <form id="loginForm">
-            <input type="email" id="email" placeholder="DIRECTOR EMAIL" required>
-            <input type="password" id="password" placeholder="SECURITY KEY" required>
-            <button type="submit" class="btn">Secure Entrance</button>
+            <div class="input-group">
+                <label>Director Email</label>
+                <input type="email" id="email" required>
+            </div>
+            <div class="input-group">
+                <label>Security Key</label>
+                <input type="password" id="password" required>
+            </div>
+            <button type="submit" id="submitBtn" class="btn">Secure Entrance</button>
         </form>
 
-        <div class="link-text">
+        <div id="error-box"></div>
+
+        <div class="footer-link">
             New Partner? <a href="signup.html">Request Invitation</a>
         </div>
     </div>
 
     <script type="module">
+        // 1. IMPORTS (Using your specific 12.8.0 version)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js";
 
+        // 2. YOUR CONFIGURATION (Pasted exactly as you provided)
         const firebaseConfig = {
             apiKey: "AIzaSyDlgnWLF74yYf_hgFIKbQhCPs5od_wD_iA",
             authDomain: "funeral-match-2b3ed.firebaseapp.com",
             projectId: "funeral-match-2b3ed",
             storageBucket: "funeral-match-2b3ed.firebasestorage.app",
             messagingSenderId: "712857397850",
-            appId: "1:712857397850:web:5c1134bbf77d116a220663"
+            appId: "1:712857397850:web:5c1134bbf77d116a220663",
+            measurementId: "G-RVMX3MKCFR"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        // 3. INITIALIZE APP
+        try {
+            const app = initializeApp(firebaseConfig);
+            const analytics = getAnalytics(app);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
+            console.log("Firebase 12.8.0 Connected");
 
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+            // 4. LOGIN LOGIC
+            const loginForm = document.getElementById('loginForm');
+            const errorBox = document.getElementById('error-box');
 
-            try {
-                // 1. Authenticate
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
+            if (loginForm) {
+                loginForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    errorBox.style.display = 'none';
+                    const btn = document.getElementById('submitBtn');
+                    btn.innerText = "VERIFYING...";
 
-                // 2. Authorize (Check Logic Gate)
-                const userDoc = await getDoc(doc(db, "users", user.uid));
-                
-                if (userDoc.exists() && userDoc.data().isApproved === true) {
-                    window.location.href = "dashboard.html"; // Success
-                } else {
-                    await signOut(auth);
-                    alert("Account is pending Admin Approval.");
-                }
-            } catch (error) {
-                alert("Login Failed: " + error.message);
+                    const email = document.getElementById('email').value;
+                    const password = document.getElementById('password').value;
+
+                    try {
+                        // A. Authenticate
+                        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                        const user = userCredential.user;
+
+                        // B. Check Approval (The Logic Gate)
+                        const userDoc = await getDoc(doc(db, "users", user.uid));
+                        
+                        if (userDoc.exists() && userDoc.data().isApproved === true) {
+                            window.location.href = "dashboard.html"; 
+                        } else {
+                            // User exists but IS NOT APPROVED
+                            await signOut(auth);
+                            throw new Error("Account pending admin approval.");
+                        }
+
+                    } catch (error) {
+                        console.error(error);
+                        btn.innerText = "SECURE ENTRANCE";
+                        errorBox.style.display = 'block';
+                        // User-friendly error messages
+                        if (error.code === 'auth/invalid-credential') {
+                            errorBox.innerText = "Incorrect email or password.";
+                        } else if (error.message.includes("pending")) {
+                            errorBox.innerText = "Access Denied: Your account is awaiting Admin approval.";
+                        } else {
+                            errorBox.innerText = "Error: " + error.message;
+                        }
+                    }
+                });
             }
-        });
+        } catch (setupError) {
+            console.error("Setup Error:", setupError);
+            const errorBox = document.getElementById('error-box');
+            errorBox.style.display = 'block';
+            errorBox.innerText = "System Error: " + setupError.message;
+        }
     </script>
 </body>
 </html>
