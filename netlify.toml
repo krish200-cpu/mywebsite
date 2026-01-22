@@ -1,0 +1,7 @@
+[build]
+publish = "frontend"
+functions = "functions"
+
+[dev]
+command = "live-server frontend"
+port = 8080

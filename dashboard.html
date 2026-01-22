@@ -1,91 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Funeral Match | Partner Dashboard</title>
-    <style>
-        /* BUNKER MODE STYLE */
-        :root { --bg: #fdfdfd; --accent: #c5a059; --dark: #1a1a1a; --border: #e0e0e0; }
-        body { background: var(--bg); font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; margin: 0; display: flex; min-height: 100vh; color: var(--dark); }
-        .sidebar { width: 260px; background: white; border-right: 1px solid var(--border); padding: 2.5rem; box-sizing: border-box; position: fixed; height: 100%; display: flex; flex-direction: column; }
-        .logo { font-weight: 300; letter-spacing: 4px; margin-bottom: 4rem; text-transform: uppercase; font-size: 1rem; }
-        .logo span { font-weight: 700; color: var(--accent); }
-        .nav-item { display: block; padding: 15px 0; color: #888; text-decoration: none; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1.5px; border-bottom: 1px solid transparent; }
-        .nav-item:hover { color: var(--dark); font-weight: bold; border-bottom: 1px solid var(--accent); }
-        .logout-btn { margin-top: auto; color: #d00; cursor: pointer; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px; }
-        .main-content { flex: 1; margin-left: 260px; padding: 4rem 5rem; }
-        .header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 4rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; }
-        .stat-card { background: white; padding: 2.5rem; border: 1px solid var(--border); box-shadow: 0 5px 20px rgba(0,0,0,0.02); }
-        .stat-value { font-size: 2.5rem; font-weight: 700; color: var(--dark); }
-        .accent-val { color: var(--accent); }
-        #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 999; display: flex; justify-content: center; align-items: center; letter-spacing: 3px; font-size: 0.8rem; color: #888; }
-    </style>
+<meta charset="UTF-8">
+<title>FuneralMatch – Dashboard</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="loading-screen">VERIFYING...</div>
-    <div class="sidebar">
-        <div class="logo">FUNERAL<span>MATCH</span></div>
-        <nav>
-            <a href="#" class="nav-item">Overview</a>
-            <a href="#" class="nav-item">Inventory</a>
-            <div id="logoutBtn" class="logout-btn">Sign Out</div>
-        </nav>
-    </div>
-    <div class="main-content">
-        <div class="header">
-            <h1 id="welcomeMsg" style="font-weight:300;">Welcome</h1>
-            <div id="userEmail" style="font-size:0.8rem;color:#888;">...</div>
-        </div>
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div style="font-size:0.7rem;text-transform:uppercase;color:#888;margin-bottom:1rem;">Partner Credit</div>
-                <div class="stat-value accent-val" id="creditBalance">£--.--</div>
-            </div>
-        </div>
-    </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
-
-        const firebaseConfig = {
-          apiKey: "AIzaSyDlgnWLF74yYf_hgFIKbQhCPs5od_wD_iA",
-          authDomain: "funeral-match-2b3ed.firebaseapp.com",
-          projectId: "funeral-match-2b3ed",
-          storageBucket: "funeral-match-2b3ed.firebasestorage.app",
-          messagingSenderId: "712857397850",
-          appId: "1:712857397850:web:5c1134bbf77d116a220663",
-          measurementId: "G-RVMX3MKCFR"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                const docSnap = await getDoc(doc(db, "users", user.uid));
-                if (docSnap.exists() && docSnap.data().isApproved === true) {
-                    document.getElementById('loading-screen').style.display = 'none';
-                    document.getElementById('userEmail').textContent = user.email;
-                    const balance = docSnap.data().balance !== undefined ? Number(docSnap.data().balance).toFixed(2) : "0.00"; 
-                    document.getElementById('creditBalance').textContent = `£${balance}`;
-                } else {
-                    await signOut(auth);
-                    window.location.href = "index.html";
-                }
-            } else {
-                window.location.href = "index.html";
-            }
-        });
-
-        document.getElementById('logoutBtn').addEventListener('click', async () => {
-            await signOut(auth);
-            window.location.href = "index.html";
-        });
-    </script>
+<div class="container">
+<h1>Welcome to FuneralMatch!</h1>
+<p id="welcomeName">Logged in as your approved account!</p>
+<button onclick="window.location.href='index.html'">Logout</button>
+</div>
 </body>
 </html>
