@@ -1,19 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"><title>Partner Registration | Funeral Match</title>
+    <meta charset="UTF-8">
+    <title>Partner Registration | Funeral Match</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="login-card">
+    <div class="container">
         <div class="logo">FUNERAL<span>MATCH</span></div>
-        <p style="font-size: 0.8rem; color: #888; margin-bottom: 2rem;">INVITATION REQUIRED</p>
+        <p style="font-size: 0.7rem; color: #888; letter-spacing: 1px; margin-bottom: 2rem;">INVITATION ONLY</p>
+        
         <form id="signupForm">
             <input type="email" id="email" placeholder="OFFICIAL EMAIL" required>
             <input type="password" id="password" placeholder="CREATE PASSWORD" required>
             <input type="text" id="inviteKey" placeholder="INVITATION KEY" required>
             <button type="submit" class="btn">Request Access</button>
         </form>
+
+        <div class="link-text">
+            Already a partner? <a href="index.html">Return to Login</a>
+        </div>
     </div>
 
     <script type="module">
@@ -34,32 +40,36 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        const MASTER_KEY = "FUNERAL-2026"; // Change this to your preferred key
+        const MASTER_KEY = "FUNERAL-2026"; // Your secret key
 
         document.getElementById('signupForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const inviteKeyInput = document.getElementById('inviteKey').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const key = document.getElementById('inviteKey').value;
 
-            if (inviteKeyInput !== MASTER_KEY) {
+            if (key !== MASTER_KEY) {
                 alert("Invalid Invitation Key.");
                 return;
             }
 
             try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value);
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                // Create the "Pending" document in Firestore
+                // Create "Pending" Profile
                 await setDoc(doc(db, "users", user.uid), {
-                    email: email.value,
-                    isApproved: false, // Default is false
-                    role: "director",
+                    email: email,
+                    isApproved: false,
+                    balance: 0,
                     createdAt: new Date()
                 });
 
-                alert("Registration successful. Access is pending admin approval.");
+                alert("Registration Successful. Please wait for Admin Approval.");
                 window.location.href = "index.html";
-            } catch (error) { alert(error.message); }
+            } catch (error) {
+                alert("Error: " + error.message);
+            }
         });
     </script>
 </body>
