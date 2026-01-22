@@ -2,67 +2,142 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Portal | Funeral Match</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Funeral Match | Admin Console</title>
+    <style>
+        /* ADMIN THEME: Slightly darker to distinguish from user pages */
+        :root { --bg: #f5f5f5; --card: #ffffff; --accent: #c5a059; --dark: #1a1a1a; --border: #e0e0e0; }
+        body { background: var(--bg); font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; display: flex; justify-content: center; padding-top: 50px; min-height: 100vh; margin: 0; color: var(--dark); }
+        
+        .admin-container { 
+            background: var(--card); 
+            padding: 2rem; 
+            width: 90%; 
+            max-width: 800px; 
+            border: 1px solid var(--border); 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+        }
+
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--accent); padding-bottom: 1rem; margin-bottom: 2rem; }
+        .logo { font-weight: 300; letter-spacing: 3px; text-transform: uppercase; font-size: 1.2rem; margin: 0; }
+        .logo span { font-weight: 700; color: var(--accent); }
+        
+        h3 { margin: 0; font-size: 0.9rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* USER LIST STYLES */
+        .user-row { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 1.5rem; 
+            border-bottom: 1px solid #eee; 
+            transition: 0.2s;
+        }
+        .user-row:hover { background: #fafafa; }
+        
+        .user-info strong { display: block; font-size: 1rem; margin-bottom: 0.2rem; }
+        .user-info small { color: #888; font-size: 0.8rem; }
+        
+        .approve-btn { 
+            background: var(--dark); 
+            color: white; 
+            border: none; 
+            padding: 10px 20px; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+            font-size: 0.7rem; 
+            cursor: pointer; 
+            transition: 0.3s;
+        }
+        .approve-btn:hover { background: var(--accent); }
+
+        .empty-state { text-align: center; padding: 3rem; color: #999; font-style: italic; }
+    </style>
 </head>
 <body>
-    <div class="container admin-wrapper">
-        <div class="logo">ADMIN<span>CONTROLS</span></div>
-        <h3 style="font-weight: 300; margin-bottom: 2rem;">Pending Approvals</h3>
-        
+
+    <div class="admin-container">
+        <div class="header">
+            <h1 class="logo">ADMIN<span>CONTROLS</span></h1>
+            <h3>Pending Requests</h3>
+        </div>
+
         <div id="pendingList">
-            <p style="color:#888; font-style:italic;">Loading requests...</p>
+            <div class="empty-state">Loading backend data...</div>
         </div>
     </div>
 
     <script type="module">
+        // 1. IMPORTS (Matching v12.8.0)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
         import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
+        // 2. YOUR CONFIGURATION
         const firebaseConfig = {
             apiKey: "AIzaSyDlgnWLF74yYf_hgFIKbQhCPs5od_wD_iA",
             authDomain: "funeral-match-2b3ed.firebaseapp.com",
             projectId: "funeral-match-2b3ed",
             storageBucket: "funeral-match-2b3ed.firebasestorage.app",
             messagingSenderId: "712857397850",
-            appId: "1:712857397850:web:5c1134bbf77d116a220663"
+            appId: "1:712857397850:web:5c1134bbf77d116a220663",
+            measurementId: "G-RVMX3MKCFR"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Real-time listener for pending users
+        // 3. REAL-TIME LISTENER
+        // This automatically updates the screen whenever a new user registers
         const q = query(collection(db, "users"), where("isApproved", "==", false));
         
         onSnapshot(q, (snapshot) => {
             const list = document.getElementById('pendingList');
-            list.innerHTML = "";
+            list.innerHTML = ""; // Clear current list
             
             if (snapshot.empty) {
-                list.innerHTML = "<p>No pending requests.</p>";
+                list.innerHTML = '<div class="empty-state">No pending approvals found.</div>';
                 return;
             }
 
             snapshot.forEach((userDoc) => {
                 const data = userDoc.data();
-                const div = document.createElement('div');
-                div.className = 'user-row';
-                div.innerHTML = `
-                    <div>
-                        <strong>${data.email}</strong><br>
-                        <small style="color:#888">Applied: ${new Date(data.createdAt.seconds * 1000).toLocaleDateString()}</small>
-                    </div>
-                    <button class="btn approve-btn" id="btn-${userDoc.id}">Approve</button>
-                `;
-                list.appendChild(div);
+                
+                // Create the row HTML
+                const row = document.createElement('div');
+                row.className = 'user-row';
+                
+                // Format the date if available
+                let dateStr = "Unknown Date";
+                if (data.createdAt && data.createdAt.seconds) {
+                    dateStr = new Date(data.createdAt.seconds * 1000).toLocaleDateString();
+                }
 
-                // Add click event to the button
+                row.innerHTML = `
+                    <div class="user-info">
+                        <strong>${data.email}</strong>
+                        <small>Applied: ${dateStr}</small>
+                    </div>
+                    <button class="approve-btn" id="btn-${userDoc.id}">Approve Access</button>
+                `;
+                
+                list.appendChild(row);
+
+                // Attach the "Click" event to the button
                 document.getElementById(`btn-${userDoc.id}`).addEventListener('click', async () => {
-                    await updateDoc(doc(db, "users", userDoc.id), { 
-                        isApproved: true,
-                        balance: 0.00 // Initialize Revenue Circle
-                    });
-                    alert(`Approved ${data.email}`);
+                    const btn = document.getElementById(`btn-${userDoc.id}`);
+                    btn.innerText = "ACTIVATING...";
+                    
+                    try {
+                        // THE APPROVAL ACTION
+                        await updateDoc(doc(db, "users", userDoc.id), {
+                            isApproved: true,
+                            balance: 0.00 // Initialize their wallet
+                        });
+                        // No need to alert; the row will disappear automatically because of onSnapshot
+                    } catch (error) {
+                        alert("Error approving: " + error.message);
+                        btn.innerText = "RETRY";
+                    }
                 });
             });
         });
