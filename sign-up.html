@@ -1,42 +1,66 @@
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-  import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><title>Partner Registration | Funeral Match</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="login-card">
+        <div class="logo">FUNERAL<span>MATCH</span></div>
+        <p style="font-size: 0.8rem; color: #888; margin-bottom: 2rem;">INVITATION REQUIRED</p>
+        <form id="signupForm">
+            <input type="email" id="email" placeholder="OFFICIAL EMAIL" required>
+            <input type="password" id="password" placeholder="CREATE PASSWORD" required>
+            <input type="text" id="inviteKey" placeholder="INVITATION KEY" required>
+            <button type="submit" class="btn">Request Access</button>
+        </form>
+    </div>
 
-  const firebaseConfig = { /* YOUR SDK CONFIG HERE */ };
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
-  const MASTER_KEY = "FUNERAL-2026"; // The key you give to partners
+        const firebaseConfig = {
+            apiKey: "AIzaSyDlgnWLF74yYf_hgFIKbQhCPs5od_wD_iA",
+            authDomain: "funeral-match-2b3ed.firebaseapp.com",
+            projectId: "funeral-match-2b3ed",
+            storageBucket: "funeral-match-2b3ed.firebasestorage.app",
+            messagingSenderId: "712857397850",
+            appId: "1:712857397850:web:5c1134bbf77d116a220663"
+        };
 
-  document.getElementById('signupForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    const inviteKey = document.getElementById('inviteKey').value;
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-    if (inviteKey !== MASTER_KEY) {
-      alert("Invalid Invitation Key. Access Denied.");
-      return;
-    }
+        const MASTER_KEY = "FUNERAL-2026"; // Change this to your preferred key
 
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const inviteKeyInput = document.getElementById('inviteKey').value;
 
-      // Create a record in Firestore marked as "NOT APPROVED"
-      await setDoc(doc(db, "users", user.uid), {
-        email: email,
-        isApproved: false, // You must change this to true manually in the console
-        role: "director",
-        createdAt: new Date()
-      });
+            if (inviteKeyInput !== MASTER_KEY) {
+                alert("Invalid Invitation Key.");
+                return;
+            }
 
-      alert("Account created. Please wait for admin approval before logging in.");
-      window.location.href = "index.html";
-    } catch (error) {
-      alert(error.message);
-    }
-  });
-</script>
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email.value, password.value);
+                const user = userCredential.user;
+
+                // Create the "Pending" document in Firestore
+                await setDoc(doc(db, "users", user.uid), {
+                    email: email.value,
+                    isApproved: false, // Default is false
+                    role: "director",
+                    createdAt: new Date()
+                });
+
+                alert("Registration successful. Access is pending admin approval.");
+                window.location.href = "index.html";
+            } catch (error) { alert(error.message); }
+        });
+    </script>
+</body>
+</html>
