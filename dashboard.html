@@ -3,63 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Director Dashboard | Funeral Match</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Partner Dashboard | Funeral Match</title>
     <style>
-        /* Soft Luxury Dashboard Extensions */
-        body { background-color: #f9f9f9; display: block; height: auto; margin: 0; }
-        .dashboard-wrapper { display: flex; min-height: 100vh; }
-        .sidebar { width: 260px; background: #ffffff; border-right: 1px solid #e0e0e0; padding: 2rem; }
-        .main-content { flex: 1; padding: 3rem; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
-        .stat-card { background: white; padding: 1.5rem; border: 1px solid #e0e0e0; border-radius: 4px; }
-        .stat-card h3 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-bottom: 0.5rem; }
-        .stat-card p { font-size: 1.5rem; font-weight: 700; margin: 0; color: #1a1a1a; }
-        .stat-card .accent { color: #c5a059; }
-        .table-container { background: white; border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden; }
-        table { width: 100%; border-collapse: collapse; text-align: left; }
-        th { background: #fdfdfd; padding: 1rem; font-size: 0.8rem; text-transform: uppercase; border-bottom: 1px solid #e0e0e0; }
-        td { padding: 1rem; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; }
-        .status-pill { padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; text-transform: uppercase; background: #eee; }
-        .logout-btn { margin-top: 2rem; background: none; border: 1px solid #e0e0e0; padding: 10px; width: 100%; cursor: pointer; }
+        :root { --bg: #f9f9f9; --accent: #c5a059; --dark: #1a1a1a; --border: #e0e0e0; }
+        body { background: var(--bg); font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0; display: flex; }
+        .sidebar { width: 240px; background: white; border-right: 1px solid var(--border); padding: 2rem; height: 100vh; position: fixed; }
+        .main { flex: 1; margin-left: 240px; padding: 4rem; }
+        .logo { font-weight: 300; letter-spacing: 3px; font-size: 1.2rem; }
+        .logo span { font-weight: 700; color: var(--accent); }
+        .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; margin: 3rem 0; }
+        .card { background: white; padding: 2rem; border: 1px solid var(--border); }
+        .card h3 { font-size: 0.7rem; letter-spacing: 1px; color: #888; text-transform: uppercase; margin: 0 0 1rem; }
+        .card p { font-size: 1.8rem; margin: 0; font-weight: 700; }
+        .accent-text { color: var(--accent); }
+        .logout { margin-top: 2rem; background: none; border: 1px solid var(--border); padding: 10px; cursor: pointer; width: 100%; }
+        table { width: 100%; border-collapse: collapse; background: white; border: 1px solid var(--border); }
+        th, td { text-align: left; padding: 1.2rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+        th { background: #fafafa; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; }
     </style>
 </head>
 <body>
-    <div class="dashboard-wrapper">
-        <aside class="sidebar">
-            <h2 class="logo">FUNERAL<span>MATCH</span></h2>
-            <nav style="margin-top: 3rem;">
-                <p style="font-size: 0.8rem; color: #c5a059; font-weight: bold;">ACTIVE LOGISTICS</p>
-                <p style="font-size: 0.8rem; color: #888;">WHOLESALE SHOP</p>
-                <p style="font-size: 0.8rem; color: #888;">PARTNER SETTINGS</p>
-            </nav>
-            <button class="logout-btn" onclick="logoutDirector()">Sign Out</button>
-        </aside>
+    <aside class="sidebar">
+        <div class="logo">FUNERAL<span>MATCH</span></div>
+        <nav style="margin-top: 4rem; display: flex; flex-direction: column; gap: 1.5rem;">
+            <a href="#" style="text-decoration: none; color: var(--accent); font-weight: bold;">Logistics Feed</a>
+            <a href="#" style="text-decoration: none; color: #888;">Wholesale Shop</a>
+            <a href="#" style="text-decoration: none; color: #888;">Payments</a>
+        </nav>
+        <button class="logout" onclick="signOutDirector()">Sign Out</button>
+    </aside>
 
-        <main class="main-content">
-            <header style="margin-bottom: 2rem;">
-                <h1 style="font-weight: 300;">Partner <span style="font-weight: 700;">Overview</span></h1>
-            </header>
+    <main class="main">
+        <h1 style="font-weight: 300;">Partner <span style="font-weight: 700;">Dashboard</span></h1>
+        
+        <div class="stats">
+            <div class="card"><h3>Active Logistics</h3><p>07</p></div>
+            <div class="card"><h3>Revenue Circle Spend</h3><p class="accent-text">£840.50</p></div>
+            <div class="card"><h3>Partner Credits</h3><p>£250.00</p></div>
+        </div>
 
-            <div class="stats-grid">
-                <div class="stat-card"><h3>Active Jobs</h3><p>04</p></div>
-                <div class="stat-card"><h3>Revenue Circle Spend</h3><p class="accent">£1,240.00</p></div>
-                <div class="stat-card"><h3>Partner Credits</h3><p>£450.00</p></div>
-            </div>
-
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr><th>Job ID</th><th>Family Name</th><th>Status</th><th>Logistics Action</th></tr>
-                    </thead>
-                    <tbody>
-                        <tr><td>#FM-921</td><td>Smith Family</td><td><span class="status-pill">Collected</span></td><td><a href="#" style="color: #c5a059;">View Details</a></td></tr>
-                        <tr><td>#FM-844</td><td>Jones Family</td><td><span class="status-pill" style="background: #fff4e5; color: #b7791f;">Awaiting Prep</span></td><td><a href="#" style="color: #c5a059;">Update Status</a></td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </main>
-    </div>
+        <table>
+            <thead><tr><th>Job ID</th><th>Family</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>
+                <tr><td>#FM-102</td><td>Harrison</td><td>In Care</td><td><a href="#" style="color: var(--accent);">View File</a></td></tr>
+                <tr><td>#FM-105</td><td>Miller</td><td>Pending</td><td><a href="#" style="color: var(--accent);">Update</a></td></tr>
+            </tbody>
+        </table>
+    </main>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
@@ -71,24 +61,17 @@
             projectId: "funeral-match-2b3ed",
             storageBucket: "funeral-match-2b3ed.firebasestorage.app",
             messagingSenderId: "712857397850",
-            appId: "1:712857397850:web:5c1134bbf77d116a220663",
-            measurementId: "G-RVMX3MKCFR"
+            appId: "1:712857397850:web:5c1134bbf77d116a220663"
         };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
-        // THE ROUTE GUARD
-        onAuthStateChanged(auth, (user) => {
-            if (!user) {
-                window.location.href = "login.html"; // Kick out if not logged in
-            }
-        });
+        // ROUTE GUARD
+        onAuthStateChanged(auth, (user) => { if (!user) window.location.href = "login.html"; });
 
-        // LOGOUT FUNCTION
-        window.logoutDirector = () => {
-            signOut(auth).then(() => { window.location.href = "login.html"; });
-        };
+        // LOGOUT
+        window.signOutDirector = () => signOut(auth).then(() => window.location.href = "login.html");
     </script>
 </body>
 </html>
