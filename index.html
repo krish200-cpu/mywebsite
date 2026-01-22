@@ -1,23 +1,98 @@
-<script type="module">
-    // ... (Imports and Config same as above) ...
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
-    const db = getFirestore(app);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Director Login | Funeral Match</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Fallback styles in case style.css is missing from root */
+        :root { --bg: #fdfdfd; --accent: #c5a059; --dark: #1a1a1a; --border: #e0e0e0; }
+        body { background: var(--bg); font-family: 'Helvetica Neue', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .login-card { background: white; padding: 3.5rem; width: 100%; max-width: 380px; border: 1px solid var(--border); text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.02); }
+        .logo { font-weight: 300; letter-spacing: 5px; margin-bottom: 2.5rem; text-transform: uppercase; font-size: 1.3rem; }
+        .logo span { font-weight: 700; color: var(--accent); }
+        .input-group { text-align: left; margin-bottom: 1.5rem; }
+        label { display: block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 0.5rem; color: #888; }
+        input { width: 100%; padding: 12px 0; border: none; border-bottom: 1px solid var(--border); outline: none; font-size: 1rem; transition: 0.3s; }
+        input:focus { border-bottom: 1px solid var(--accent); }
+        .btn { width: 100%; padding: 18px; background: var(--dark); color: white; border: none; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; margin-top: 1rem; transition: 0.3s; }
+        .btn:hover { background: var(--accent); }
+        .footer-links { margin-top: 2rem; font-size: 0.75rem; color: #777; letter-spacing: 0.5px; }
+        .footer-links a { color: var(--accent); text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
 
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        try {
-            const userCredential = await signInWithEmailAndPassword(auth, email.value, password.value);
-            const user = userCredential.user;
+    <div class="login-card">
+        <div class="logo">FUNERAL<span>MATCH</span></div>
+        
+        <form id="loginForm">
+            <div class="input-group">
+                <label>Director Email</label>
+                <input type="email" id="email" required>
+            </div>
+            <div class="input-group">
+                <label>Security Key</label>
+                <input type="password" id="password" required>
+            </div>
+            <button type="submit" class="btn">Secure Entrance</button>
+        </form>
 
-            // CHECK APPROVAL STATUS
-            const userDoc = await getDoc(doc(db, "users", user.uid));
-            
-            if (userDoc.exists() && userDoc.data().isApproved === true) {
-                window.location.href = "dashboard.html"; // Approved entry
-            } else {
-                await auth.signOut(); // Kick out if not approved
-                alert("Account Pending Approval. Please contact the administrator.");
-            }
-        } catch (error) { alert("Login Failed: Check credentials."); }
-    });
-</script>
+        <div class="footer-links">
+            <p>New Partner? <a href="signup.html">Request Invitation</a></p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+
+        // Your specific project credentials
+        const firebaseConfig = {
+            apiKey: "AIzaSyDlgnWLF74yYf_hgFIKbQhCPs5od_wD_iA",
+            authDomain: "funeral-match-2b3ed.firebaseapp.com",
+            projectId: "funeral-match-2b3ed",
+            storageBucket: "funeral-match-2b3ed.firebasestorage.app",
+            messagingSenderId: "712857397850",
+            appId: "1:712857397850:web:5c1134bbf77d116a220663"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const loginForm = document.getElementById('loginForm');
+
+        if (loginForm) {
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const emailVal = document.getElementById('email').value;
+                const passwordVal = document.getElementById('password').value;
+
+                try {
+                    // 1. Initial Authentication
+                    const userCredential = await signInWithEmailAndPassword(auth, emailVal, passwordVal);
+                    const user = userCredential.user;
+
+                    // 2. Authorization Gate: Check approval status in Firestore
+                    const userDoc = await getDoc(doc(db, "users", user.uid));
+                    
+                    if (userDoc.exists() && userDoc.data().isApproved === true) {
+                        // Success: Redirect to protected dashboard
+                        window.location.href = "dashboard.html";
+                    } else {
+                        // Failure: Logged in but not approved by admin
+                        await auth.signOut();
+                        alert("Access Restricted: Your account is currently pending admin approval.");
+                    }
+                } catch (error) {
+                    alert("Authentication Failed: Please check your credentials.");
+                }
+            });
+        }
+    </script>
+</body>
+</html>
