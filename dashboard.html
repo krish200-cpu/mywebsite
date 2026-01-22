@@ -4,57 +4,75 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Partner Dashboard | Funeral Match</title>
+    <link rel="stylesheet" href="style.css">
     <style>
-        :root { --bg: #f9f9f9; --accent: #c5a059; --dark: #1a1a1a; --border: #e0e0e0; }
-        body { background: var(--bg); font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0; display: flex; }
-        .sidebar { width: 240px; background: white; border-right: 1px solid var(--border); padding: 2rem; height: 100vh; position: fixed; }
-        .main { flex: 1; margin-left: 240px; padding: 4rem; }
-        .logo { font-weight: 300; letter-spacing: 3px; font-size: 1.2rem; }
+        /* Fallback Luxury Styles */
+        :root { --bg: #fdfdfd; --accent: #c5a059; --dark: #1a1a1a; --border: #e0e0e0; }
+        body { background: var(--bg); font-family: 'Helvetica Neue', sans-serif; margin: 0; display: flex; }
+        
+        /* Sidebar Navigation */
+        .sidebar { width: 250px; background: white; height: 100vh; border-right: 1px solid var(--border); padding: 2rem; box-sizing: border-box; position: fixed; }
+        .logo { font-weight: 300; letter-spacing: 4px; margin-bottom: 3rem; text-transform: uppercase; font-size: 1rem; }
         .logo span { font-weight: 700; color: var(--accent); }
-        .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; margin: 3rem 0; }
-        .card { background: white; padding: 2rem; border: 1px solid var(--border); }
-        .card h3 { font-size: 0.7rem; letter-spacing: 1px; color: #888; text-transform: uppercase; margin: 0 0 1rem; }
-        .card p { font-size: 1.8rem; margin: 0; font-weight: 700; }
-        .accent-text { color: var(--accent); }
-        .logout { margin-top: 2rem; background: none; border: 1px solid var(--border); padding: 10px; cursor: pointer; width: 100%; }
-        table { width: 100%; border-collapse: collapse; background: white; border: 1px solid var(--border); }
-        th, td { text-align: left; padding: 1.2rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
-        th { background: #fafafa; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; }
+        .nav-item { display: block; padding: 15px 0; color: #777; text-decoration: none; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1.5px; transition: 0.3s; }
+        .nav-item:hover, .nav-item.active { color: var(--dark); font-weight: bold; }
+        .logout-btn { margin-top: auto; color: red; cursor: pointer; }
+
+        /* Main Content Area */
+        .main-content { flex: 1; margin-left: 250px; padding: 4rem; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem; }
+        h1 { font-weight: 300; font-size: 1.8rem; margin: 0; }
+        .user-badge { font-size: 0.8rem; color: #888; }
+
+        /* The Revenue Circle Cards */
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+        .stat-card { background: white; padding: 2rem; border: 1px solid var(--border); box-shadow: 0 5px 15px rgba(0,0,0,0.02); }
+        .stat-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; color: #888; margin-bottom: 1rem; }
+        .stat-value { font-size: 2rem; font-weight: 700; color: var(--dark); }
+        .accent-val { color: var(--accent); }
     </style>
 </head>
 <body>
-    <aside class="sidebar">
-        <div class="logo">FUNERAL<span>MATCH</span></div>
-        <nav style="margin-top: 4rem; display: flex; flex-direction: column; gap: 1.5rem;">
-            <a href="#" style="text-decoration: none; color: var(--accent); font-weight: bold;">Logistics Feed</a>
-            <a href="#" style="text-decoration: none; color: #888;">Wholesale Shop</a>
-            <a href="#" style="text-decoration: none; color: #888;">Payments</a>
-        </nav>
-        <button class="logout" onclick="signOutDirector()">Sign Out</button>
-    </aside>
 
-    <main class="main">
-        <h1 style="font-weight: 300;">Partner <span style="font-weight: 700;">Dashboard</span></h1>
-        
-        <div class="stats">
-            <div class="card"><h3>Active Logistics</h3><p>07</p></div>
-            <div class="card"><h3>Revenue Circle Spend</h3><p class="accent-text">£840.50</p></div>
-            <div class="card"><h3>Partner Credits</h3><p>£250.00</p></div>
+    <div class="sidebar">
+        <div class="logo">FUNERAL<span>MATCH</span></div>
+        <nav>
+            <a href="#" class="nav-item active">Overview</a>
+            <a href="#" class="nav-item">Wholesale Inventory</a>
+            <a href="#" class="nav-item">Logistics</a>
+            <a href="#" class="nav-item">My Profile</a>
+            <a href="#" id="logoutBtn" class="nav-item logout-btn" style="margin-top: 5rem;">Sign Out</a>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <h1 id="welcomeMsg">Welcome, Director</h1>
+            <div class="user-badge" id="userEmail">Loading ID...</div>
         </div>
 
-        <table>
-            <thead><tr><th>Job ID</th><th>Family</th><th>Status</th><th>Action</th></tr></thead>
-            <tbody>
-                <tr><td>#FM-102</td><td>Harrison</td><td>In Care</td><td><a href="#" style="color: var(--accent);">View File</a></td></tr>
-                <tr><td>#FM-105</td><td>Miller</td><td>Pending</td><td><a href="#" style="color: var(--accent);">Update</a></td></tr>
-            </tbody>
-        </table>
-    </main>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Partner Credit Balance</div>
+                <div class="stat-value accent-val" id="creditBalance">£--.--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Active Arrangements</div>
+                <div class="stat-value">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Spend (YTD)</div>
+                <div class="stat-value">£0.00</div>
+            </div>
+        </div>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
+        // 1. Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDlgnWLF74yYf_hgFIKbQhCPs5od_wD_iA",
             authDomain: "funeral-match-2b3ed.firebaseapp.com",
@@ -66,12 +84,52 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const db = getFirestore(app);
 
-        // ROUTE GUARD
-        onAuthStateChanged(auth, (user) => { if (!user) window.location.href = "login.html"; });
+        // 2. The "Gatekeeper" & Data Fetcher
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                console.log("User detected:", user.email);
+                
+                try {
+                    // Pull the Director's specific "Revenue Ledger" from Firestore
+                    const docRef = doc(db, "users", user.uid);
+                    const docSnap = await getDoc(docRef);
 
-        // LOGOUT
-        window.signOutDirector = () => signOut(auth).then(() => window.location.href = "login.html");
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+
+                        // FINAL SECURITY CHECK: Kick out if not approved
+                        if (data.isApproved !== true) {
+                            alert("Access Revoked: Pending Approval.");
+                            await signOut(auth);
+                            window.location.href = "index.html";
+                            return;
+                        }
+
+                        // Populate the Dashboard
+                        document.getElementById('userEmail').textContent = data.email;
+                        
+                        // Show Balance (Default to £0.00 if field doesn't exist yet)
+                        const balance = data.balance ? data.balance.toFixed(2) : "0.00"; 
+                        document.getElementById('creditBalance').textContent = `£${balance}`;
+                    } else {
+                        console.log("No such document!");
+                    }
+                } catch (error) {
+                    console.error("Error fetching data:", error);
+                }
+            } else {
+                // If no user is logged in, force them back to the start
+                window.location.href = "index.html";
+            }
+        });
+
+        // 3. Logout Functionality
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await signOut(auth);
+            window.location.href = "index.html";
+        });
     </script>
 </body>
 </html>
