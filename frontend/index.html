@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>FuneralMatch – Login</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+<h1>FuneralMatch – Login</h1>
+<form id="loginForm">
+<input type="email" id="email" placeholder="Email" required>
+<input type="password" id="password" placeholder="Password" required>
+<button type="submit">Login</button>
+</form>
+<p>Don't have an account? <a href="signup.html">Sign up</a></p>
+<div id="message"></div>
+</div>
+<script>
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+e.preventDefault();
+const res = await fetch('/.netlify/functions/login', {
+method: 'POST',
+body: JSON.stringify({
+email: document.getElementById('email').value,
+password: document.getElementById('password').value
+})
+});
+const data = await res.json();
+document.getElementById('message').innerText = data.message;
+if(data.success) window.location.href = 'dashboard.html';
+});
+</script>
+</body>
+</html>
