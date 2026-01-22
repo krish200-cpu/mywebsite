@@ -13,12 +13,17 @@ body {
     color: var(--dark);
     margin: 0;
     display: flex;
-    justify-content: center;
-    align-items: center;
     min-height: 100vh;
 }
 
-.container {
+/* CENTERED LAYOUT (For Login/Signup) */
+body:has(.login-card), body:has(.container) {
+    justify-content: center;
+    align-items: center;
+}
+
+/* CARDS */
+.login-card, .container {
     background: var(--card);
     padding: 3.5rem;
     width: 100%;
@@ -28,6 +33,7 @@ body {
     text-align: center;
 }
 
+/* TYPOGRAPHY */
 .logo {
     font-weight: 300;
     letter-spacing: 5px;
@@ -35,23 +41,36 @@ body {
     text-transform: uppercase;
     font-size: 1.2rem;
 }
-
 .logo span { font-weight: 700; color: var(--accent); }
+
+h1, h2, h3 { font-weight: 300; letter-spacing: 1px; }
+
+/* FORMS */
+.input-group { text-align: left; margin-bottom: 1.5rem; }
+
+label {
+    display: block;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 0.5rem;
+    color: #888;
+}
 
 input {
     width: 100%;
-    padding: 14px 0;
-    margin-bottom: 1.5rem;
+    padding: 12px 0;
     border: none;
     border-bottom: 1px solid var(--border);
     outline: none;
     font-size: 1rem;
     background: transparent;
     transition: 0.3s;
+    box-sizing: border-box; /* Fixes padding width issues */
 }
-
 input:focus { border-bottom: 1px solid var(--accent); }
 
+/* BUTTONS */
 .btn {
     width: 100%;
     padding: 18px;
@@ -65,22 +84,45 @@ input:focus { border-bottom: 1px solid var(--accent); }
     transition: 0.3s;
     margin-top: 1rem;
 }
-
 .btn:hover { background: var(--accent); }
 
-.link-text {
-    margin-top: 2rem;
-    font-size: 0.75rem;
-    color: #888;
+/* LINKS */
+.footer-link, .link-text { 
+    margin-top: 2rem; 
+    font-size: 0.75rem; 
+    color: #888; 
+}
+a { color: var(--accent); text-decoration: none; font-weight: bold; }
+
+/* ADMIN PAGE SPECIFIC */
+.admin-container { 
+    margin: 4rem auto; 
+    max-width: 800px; 
+    width: 90%; 
+}
+.user-row { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    padding: 1.5rem; 
+    border-bottom: 1px solid #eee; 
+    background: white;
+}
+.approve-btn { 
+    width: auto; 
+    padding: 10px 20px; 
+    margin: 0; 
+    font-size: 0.7rem; 
 }
 
-.link-text a {
-    color: var(--accent);
-    text-decoration: none;
-    font-weight: bold;
+/* ERROR BOXES */
+#error-box { 
+    display: none; 
+    background: #ffeded; 
+    color: #d00; 
+    padding: 10px; 
+    font-size: 0.8rem; 
+    margin-top: 1rem; 
+    border: 1px solid #ffcccc; 
+    text-align: left; 
 }
-
-/* Admin Portal Specifics */
-.admin-wrapper { max-width: 800px; width: 90%; text-align: left; }
-.user-row { display: flex; justify-content: space-between; padding: 1.5rem 0; border-bottom: 1px solid var(--border); }
-.approve-btn { width: auto; padding: 10px 20px; margin: 0; font-size: 0.7rem; }
