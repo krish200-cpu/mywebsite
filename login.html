@@ -1,38 +1,136 @@
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Director Login | Funeral Match</title>
+    <style>
+        :root {
+            --bg-color: #fdfdfd;
+            --card-bg: #ffffff;
+            --accent-gold: #c5a059;
+            --text-main: #1a1a1a;
+            --border-soft: #e0e0e0;
+        }
+        body {
+            background-color: var(--bg-color);
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: var(--text-main);
+        }
+        .login-card {
+            background: var(--card-bg);
+            padding: 3.5rem;
+            width: 100%;
+            max-width: 380px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.03);
+            border: 1px solid var(--border-soft);
+            text-align: center;
+        }
+        .logo {
+            font-weight: 300;
+            letter-spacing: 5px;
+            font-size: 1.4rem;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+        }
+        .logo span { font-weight: 700; color: var(--accent-gold); }
+        .input-group { text-align: left; margin-bottom: 1.5rem; }
+        label { 
+            display: block; 
+            font-size: 0.75rem; 
+            text-transform: uppercase; 
+            letter-spacing: 1.5px; 
+            margin-bottom: 0.5rem; 
+            color: #777;
+        }
+        input {
+            width: 100%;
+            padding: 12px 0;
+            border: none;
+            border-bottom: 1px solid var(--border-soft);
+            outline: none;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        input:focus { border-bottom: 1px solid var(--accent-gold); }
+        .login-btn {
+            width: 100%;
+            padding: 18px;
+            background: var(--text-main);
+            color: #fff;
+            border: none;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            margin-top: 2rem;
+            transition: background 0.3s;
+        }
+        .login-btn:hover { background: var(--accent-gold); }
+        .error-msg { color: #d9534f; font-size: 0.8rem; margin-top: 1rem; display: none; }
+    </style>
+</head>
+<body>
 
-  // PASTE YOUR SDK CONFIG HERE
-  const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
-  };
+    <div class="login-card">
+        <div class="logo">FUNERAL<span>MATCH</span></div>
+        <p style="font-size: 0.9rem; color: #888; margin-bottom: 2.5rem;">Partner Logistics Entrance</p>
+        
+        <form id="loginForm">
+            <div class="input-group">
+                <label>Director Email</label>
+                <input type="email" id="email" placeholder="name@firm.com" required>
+            </div>
+            <div class="input-group">
+                <label>Security Key</label>
+                <input type="password" id="password" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="login-btn">Secure Entrance</button>
+            <div id="errorMessage" class="error-msg"></div>
+        </form>
+    </div>
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
 
-  // Capture the form submission
-  document.getElementById('loginForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    
-    const email = document.getElementById('directorID').value;
-    const password = document.getElementById('password').value;
+        // Your specific configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDlgnWLF74yYf_hgFIKbQhCPs5od_wD_iA",
+            authDomain: "funeral-match-2b3ed.firebaseapp.com",
+            projectId: "funeral-match-2b3ed",
+            storageBucket: "funeral-match-2b3ed.firebasestorage.app",
+            messagingSenderId: "712857397850",
+            appId: "1:712857397850:web:5c1134bbf77d116a220663",
+            measurementId: "G-RVMX3MKCFR"
+        };
 
-    // The Logic Gate
-    signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        // Success: Take them to the management software
-        window.location.href = "dashboard.html"; 
-      })
-      .catch((error) => {
-        // Luxury Error Handling: Simple and bold
-        console.error("Login Error:", error.code);
-        alert("Invalid Credentials. Please contact Funeral Match support.");
-      });
-  });
-</script>
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        const loginForm = document.getElementById('loginForm');
+        const errorDiv = document.getElementById('errorMessage');
+
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    // Success: Redirect to Dashboard
+                    window.location.href = "dashboard.html";
+                })
+                .catch((error) => {
+                    errorDiv.style.display = 'block';
+                    errorDiv.innerText = "Access Denied: Please verify your credentials.";
+                });
+        });
+    </script>
+</body>
+</html>
