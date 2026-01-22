@@ -5,9 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Funeral Match | Secure Entrance</title>
     <style>
-        /* SOFT LUXURY AESTHETIC */
+        /* --- BUNKER MODE: EMBEDDED LUXURY STYLE --- */
         :root { --bg: #fdfdfd; --accent: #c5a059; --dark: #1a1a1a; --border: #e0e0e0; }
-        body { background: var(--bg); font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: var(--dark); }
+        
+        body { 
+            background: var(--bg); 
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            color: var(--dark); 
+        }
         
         .login-card { 
             background: white; 
@@ -45,11 +55,19 @@
         .footer-link { margin-top: 2rem; font-size: 0.75rem; color: #888; }
         .footer-link a { color: var(--accent); text-decoration: none; font-weight: bold; }
 
-        /* DEBUG CONSOLE (Hidden unless error occurs) */
-        #error-box { display: none; background: #ffeded; color: #d00; padding: 10px; font-size: 0.8rem; margin-top: 1rem; border: 1px solid #ffcccc; text-align: left; }
+        /* DEBUG CONSOLE (Only shows if something breaks) */
+        #debug-console { 
+            display: none; 
+            position: fixed; bottom: 0; left: 0; width: 100%; 
+            background: #000; color: #ff5555; font-family: monospace; 
+            font-size: 12px; padding: 15px; border-top: 2px solid red; 
+            z-index: 9999;
+        }
     </style>
 </head>
 <body>
+
+    <div id="debug-console"></div>
 
     <div class="login-card">
         <div class="logo">FUNERAL<span>MATCH</span></div>
@@ -66,89 +84,77 @@
             <button type="submit" id="submitBtn" class="btn">Secure Entrance</button>
         </form>
 
-        <div id="error-box"></div>
-
         <div class="footer-link">
             New Partner? <a href="signup.html">Request Invitation</a>
         </div>
     </div>
 
-    <script type="module">
-        // 1. IMPORTS (Using your specific 12.8.0 version)
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js";
-
-        // 2. YOUR CONFIGURATION (Pasted exactly as you provided)
-        const firebaseConfig = {
-            apiKey: "AIzaSyDlgnWLF74yYf_hgFIKbQhCPs5od_wD_iA",
-            authDomain: "funeral-match-2b3ed.firebaseapp.com",
-            projectId: "funeral-match-2b3ed",
-            storageBucket: "funeral-match-2b3ed.firebasestorage.app",
-            messagingSenderId: "712857397850",
-            appId: "1:712857397850:web:5c1134bbf77d116a220663",
-            measurementId: "G-RVMX3MKCFR"
+    <script>
+        window.onerror = function(msg, url, line) {
+            const consoleBox = document.getElementById('debug-console');
+            consoleBox.style.display = 'block';
+            consoleBox.innerHTML += `CRITICAL ERROR: ${msg} <br> (Line: ${line})<br>`;
+            return false;
         };
+    </script>
 
-        // 3. INITIALIZE APP
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+
+        // --- YOUR EXACT CONFIGURATION ---
+        const firebaseConfig = {
+          apiKey: "AIzaSyDlgnWLF74yYf_hgFIKbQhCPs5od_wD_iA",
+          authDomain: "funeral-match-2b3ed.firebaseapp.com",
+          projectId: "funeral-match-2b3ed",
+          storageBucket: "funeral-match-2b3ed.firebasestorage.app",
+          messagingSenderId: "712857397850",
+          appId: "1:712857397850:web:5c1134bbf77d116a220663",
+          measurementId: "G-RVMX3MKCFR"
+        };
+        // --------------------------------
+
         try {
             const app = initializeApp(firebaseConfig);
-            const analytics = getAnalytics(app);
             const auth = getAuth(app);
             const db = getFirestore(app);
-            console.log("Firebase 12.8.0 Connected");
+            console.log("System Online");
 
-            // 4. LOGIN LOGIC
-            const loginForm = document.getElementById('loginForm');
-            const errorBox = document.getElementById('error-box');
+            document.getElementById('loginForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const btn = document.getElementById('submitBtn');
+                const originalText = btn.innerText;
+                btn.innerText = "VERIFYING...";
+                
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
 
-            if (loginForm) {
-                loginForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    errorBox.style.display = 'none';
-                    const btn = document.getElementById('submitBtn');
-                    btn.innerText = "VERIFYING...";
+                try {
+                    // 1. Authenticate
+                    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                    const user = userCredential.user;
 
-                    const email = document.getElementById('email').value;
-                    const password = document.getElementById('password').value;
-
-                    try {
-                        // A. Authenticate
-                        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                        const user = userCredential.user;
-
-                        // B. Check Approval (The Logic Gate)
-                        const userDoc = await getDoc(doc(db, "users", user.uid));
-                        
-                        if (userDoc.exists() && userDoc.data().isApproved === true) {
-                            window.location.href = "dashboard.html"; 
-                        } else {
-                            // User exists but IS NOT APPROVED
-                            await signOut(auth);
-                            throw new Error("Account pending admin approval.");
-                        }
-
-                    } catch (error) {
-                        console.error(error);
-                        btn.innerText = "SECURE ENTRANCE";
-                        errorBox.style.display = 'block';
-                        // User-friendly error messages
-                        if (error.code === 'auth/invalid-credential') {
-                            errorBox.innerText = "Incorrect email or password.";
-                        } else if (error.message.includes("pending")) {
-                            errorBox.innerText = "Access Denied: Your account is awaiting Admin approval.";
-                        } else {
-                            errorBox.innerText = "Error: " + error.message;
-                        }
+                    // 2. Authorize
+                    const userDoc = await getDoc(doc(db, "users", user.uid));
+                    
+                    if (userDoc.exists() && userDoc.data().isApproved === true) {
+                        window.location.href = "dashboard.html";
+                    } else {
+                        await signOut(auth);
+                        alert("Access Denied: Pending Admin Approval");
+                        btn.innerText = originalText;
                     }
-                });
-            }
+                } catch (error) {
+                    console.error(error);
+                    alert("Login Error: " + error.message);
+                    btn.innerText = originalText;
+                }
+            });
+
         } catch (setupError) {
-            console.error("Setup Error:", setupError);
-            const errorBox = document.getElementById('error-box');
-            errorBox.style.display = 'block';
-            errorBox.innerText = "System Error: " + setupError.message;
+            document.getElementById('debug-console').style.display = 'block';
+            document.getElementById('debug-console').innerHTML += `SETUP FAILED: ${setupError.message}`;
         }
     </script>
 </body>
