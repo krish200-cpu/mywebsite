@@ -1,0 +1,38 @@
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+  // PASTE YOUR SDK CONFIG HERE
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  // Capture the form submission
+  document.getElementById('loginForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const email = document.getElementById('directorID').value;
+    const password = document.getElementById('password').value;
+
+    // The Logic Gate
+    signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Success: Take them to the management software
+        window.location.href = "dashboard.html"; 
+      })
+      .catch((error) => {
+        // Luxury Error Handling: Simple and bold
+        console.error("Login Error:", error.code);
+        alert("Invalid Credentials. Please contact Funeral Match support.");
+      });
+  });
+</script>
